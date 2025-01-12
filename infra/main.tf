@@ -150,7 +150,7 @@ resource "aws_ecr_repository" "demo_repo" {
 # ECS Task Definition
 resource "aws_ecs_task_definition" "task" {
   family                   = "CLD34-devops-final-task"
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"]
   cpu                      = "128"
   memory                   = "256"
@@ -165,7 +165,6 @@ resource "aws_ecs_task_definition" "task" {
       portMappings = [
         {
           containerPort = 80
-          hostPort      = 80
           protocol      = "tcp"
         }
       ]
@@ -182,6 +181,12 @@ resource "aws_ecs_service" "service" {
   deployment_minimum_healthy_percent = 50 
   deployment_maximum_percent         = 200
   launch_type     = "EC2"
+
+  network_configuration {
+    subnets         = [aws_subnet.public.id]
+    security_groups = [aws_security_group.ecs_sg.id]
+    assign_public_ip = true # Para permitir acesso externo
+  }
 }
 
 resource "aws_appautoscaling_target" "ecs_scaling_target" {
