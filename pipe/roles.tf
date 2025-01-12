@@ -425,3 +425,31 @@ resource "aws_iam_policy_attachment" "codepipeline_ecs_policy_attach" {
   roles      = [aws_iam_role.codepipeline_role.name]
   policy_arn = aws_iam_policy.codedeploy_ecs_policy.arn
 }
+
+resource "aws_iam_role_policy" "codebuild_autoscaling_policy" {
+  name = "CodeBuildAutoscalingPolicy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "application-autoscaling:RegisterScalableTarget",
+          "application-autoscaling:DescribeScalableTargets",
+          "application-autoscaling:PutScalingPolicy",
+          "application-autoscaling:DescribeScalingPolicies",
+          "application-autoscaling:ListTagsForResource",
+          "application-autoscaling:DeregisterScalableTarget"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["iam:CreateServiceLinkedRole"]
+        Resource = "*"
+      }
+    ]
+  })
+}
