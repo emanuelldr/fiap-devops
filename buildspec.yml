@@ -9,7 +9,6 @@ phases:
   install:
     runtime-versions:
       python: 3.x
-      docker: 20
     commands:
       - echo "Instalando dependências..."
       - apt-get update && apt-get install -y unzip

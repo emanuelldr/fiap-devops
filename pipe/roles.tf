@@ -162,3 +162,29 @@ resource "aws_iam_role_policy" "codebuild_ecr_policy" {
     ]
   })
 }
+
+resource "aws_codebuild_project" "build" {
+  name          = "CLD34-devops-final-Build"
+  service_role  = aws_iam_role.codebuild_role.arn
+
+  environment {
+    compute_type    = "BUILD_GENERAL1_MEDIUM"
+    image           = "aws/codebuild/standard:5.0"
+    type            = "LINUX_CONTAINER"
+    privileged_mode = true
+  }
+
+  source {
+    type      = "S3"
+    location  = "arn:aws:s3:::cld34-devops-final-pipeline-bucket/buildspec.yml"
+  }
+
+  artifacts {
+    type                = "S3"
+    location            = "cld34-devops-final-pipeline-bucket"  # Nome do bucket S3
+    path                = "artifacts"                          # Subpasta no bucket
+    packaging           = "ZIP"                                # Opcional: compactar os artefatos
+    override_artifact_name = true                              # Permite nome personalizado
+    artifact_identifier = "build-output"                       # Identificador opcional
+  }
+}
