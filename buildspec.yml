@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    ECR_REPOSITORY: "cld34-devops-final-repo"  # Nome do repositório no ECR
+    ECR_REPOSITORY: cld34-devops-repo"  # Nome do repositório no ECR
     IMAGE_TAG: "latest"  # Pode ser atualizado para usar algo dinâmico
 
 phases:
@@ -34,7 +34,7 @@ phases:
       - cd ../app
       - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
       - echo "Tagueando a imagem Docker..."
-      - docker tag $ECR_REPOSITORY:$IMAGE_TAG <aws_account_id>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+      - docker tag $ECR_REPOSITORY:$IMAGE_TAG 058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
   post_build:
     commands:
       - echo "Fazendo push da imagem para o Amazon ECR..."
