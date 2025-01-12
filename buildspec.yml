@@ -39,6 +39,9 @@ phases:
       - echo "Fazendo push da imagem para o Amazon ECR..."
       - docker push 058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
       - echo "Build e push da imagem concluídos com sucesso!"
+      - echo "Criando o arquivo imagedefinitions.json..."
+      - echo '[{"name":"app-container","imageUri":"'"$ECR_REPOSITORY_URI:latest"'"}]' > imagedefinitions.json
+      - echo "Arquivo imagedefinitions.json gerado com sucesso."
 
 artifacts:
   files:
