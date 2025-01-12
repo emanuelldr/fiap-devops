@@ -128,7 +128,8 @@ resource "aws_iam_role_policy" "codebuild_s3_policy" {
         Effect   = "Allow",
         Action   = [
           "s3:GetObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:PutObject"
         ],
         Resource = [
           "arn:aws:s3:::cld34-devops-final-pipeline-bucket",           # Permissão para listar o bucket
@@ -155,7 +156,8 @@ resource "aws_iam_role_policy" "codebuild_ecr_policy" {
           "ecr:CompleteLayerUpload",
           "ecr:InitiateLayerUpload",
           "ecr:PutImage",
-          "ecr:UploadLayerPart"
+          "ecr:UploadLayerPart",
+          "ecr:CreateRepository"
         ],
         Resource = "*"
       }
@@ -187,4 +189,32 @@ resource "aws_codebuild_project" "build" {
     override_artifact_name = true                              # Permite nome personalizado
     artifact_identifier = "build-output"                       # Identificador opcional
   }
+}
+
+resource "aws_iam_role_policy" "codebuild_ec2_policy" {
+  name = "CodeBuildEC2AccessPolicy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "ec2:CreateVpc",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:CreateSubnet",
+          "ec2:DescribeRouteTables",
+          "ec2:CreateRouteTable",
+          "ec2:CreateRoute",
+          "ec2:AssociateRouteTable",
+          "ec2:DescribeSecurityGroups",
+          "ec2:CreateSecurityGroup",
+          "ec2:AuthorizeSecurityGroupIngress"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
 }

@@ -37,7 +37,7 @@ phases:
   post_build:
     commands:
       - echo "Fazendo push da imagem para o Amazon ECR..."
-      - docker push <aws_account_id>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+      - docker push 058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
       - echo "Build e push da imagem concluídos com sucesso!"
 
 artifacts:
