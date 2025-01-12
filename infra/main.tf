@@ -150,7 +150,7 @@ resource "aws_ecr_repository" "demo_repo" {
 # ECS Task Definition
 resource "aws_ecs_task_definition" "task" {
   family                   = "CLD34-devops-final-task"
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"]
   cpu                      = "128"
   memory                   = "256"
@@ -165,7 +165,6 @@ resource "aws_ecs_task_definition" "task" {
       portMappings = [
         {
           containerPort = 80
-          hostPort      = 80
           protocol      = "tcp"
         }
       ]
@@ -179,17 +178,22 @@ resource "aws_ecs_service" "service" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.task.arn
   desired_count   = 1
-  deployment_minimum_healthy_percent = 50 
-  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0 
+  deployment_maximum_percent         = 100
   launch_type     = "EC2"
+
+  network_configuration {
+    subnets         = [aws_subnet.public.id]
+    security_groups = [aws_security_group.ecs_sg.id]
+  }
 }
 
 resource "aws_appautoscaling_target" "ecs_scaling_target" {
   service_namespace  = "ecs"
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  min_capacity       = 1 # O serviço nunca terá menos de 1 tarefa
-  max_capacity       = 2 # O serviço pode escalar até 2 tarefas
+  min_capacity       = 0 # O serviço nunca terá menos de 1 tarefa
+  max_capacity       = 1 # O serviço pode escalar até 2 tarefas
 }
 
 resource "aws_appautoscaling_policy" "scale_up" {
