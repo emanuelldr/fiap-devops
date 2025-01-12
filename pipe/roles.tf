@@ -203,6 +203,7 @@ resource "aws_iam_role_policy" "codebuild_ec2_policy" {
         Action   = [
           "ec2:CreateVpc",
           "ec2:DescribeVpcs",
+          "ec2:CreateTags",
           "ec2:DescribeSubnets",
           "ec2:CreateSubnet",
           "ec2:DescribeRouteTables",
@@ -214,6 +215,65 @@ resource "aws_iam_role_policy" "codebuild_ec2_policy" {
           "ec2:AuthorizeSecurityGroupIngress"
         ],
         Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "codebuild_ecs_policy" {
+  name = "CodeBuildECSAccessPolicy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "ecs:CreateCluster",
+          "ecs:DeleteCluster",
+          "ecs:DescribeClusters",
+          "ecs:ListClusters",
+          "ecs:RegisterTaskDefinition",
+          "ecs:DeregisterTaskDefinition",
+          "ecs:DescribeTaskDefinition",
+          "ecs:RunTask",
+          "ecs:StopTask",
+          "ecs:ListTasks",
+          "ecs:DescribeTasks",
+          "ecs:UpdateClusterSettings",
+          "ecs:PutClusterCapacityProviders"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "codebuild_iam_policy" {
+  name = "CodeBuildIAMAccessPolicy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "iam:CreateRole",
+          "iam:AttachRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:GetRole",
+          "iam:DeleteRole",
+          "iam:ListRolePolicies",
+          "iam:DeleteRolePolicy",
+          "iam:PassRole"
+        ],
+        Resource = [
+          "arn:aws:iam::058264065873:role/CLD34-devops-final-ECS-Instance-Role",
+          "arn:aws:iam::058264065873:role/*"
+        ]
       }
     ]
   })
