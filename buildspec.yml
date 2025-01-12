@@ -1,25 +1,48 @@
 version: 0.2
 
+env:
+  variables:
+    ECR_REPOSITORY: "cld34-devops-final-repo"  # Nome do repositório no ECR
+    IMAGE_TAG: "latest"  # Pode ser atualizado para usar algo dinâmico
+
 phases:
+  install:
+    runtime-versions:
+      python: 3.x
+      docker: 20
+    commands:
+      - echo "Instalando dependências..."
+      - apt-get update && apt-get install -y unzip
+      - curl -o terraform.zip https://releases.hashicorp.com/terraform/1.5.6/terraform_1.5.6_linux_amd64.zip
+      - unzip terraform.zip
+      - mv terraform /usr/local/bin/
+      - terraform version
+      - pip install --upgrade pip
   pre_build:
     commands:
-      - echo "Setting up Terraform..."
-      - terraform init -input=false
+      - echo "Fazendo login no Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo "Preparando Terraform..."
+      - cd infra
+      - terraform init
+      - terraform validate
   build:
     commands:
-      - echo "Applying Terraform to provision infrastructure..."
-      - terraform apply -auto-approve -input=false
-      - echo "Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_REPOSITORY_URL>
-      - echo "Building the Docker image..."
-      - docker build -t hello-world .
-      - docker tag hello-world:latest <ECR_REPOSITORY_URL>:latest
+      - echo "Executando Terraform apply..."
+      - terraform apply -auto-approve
+      - echo "Construindo a imagem Docker..."
+      - cd ../app
+      - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+      - echo "Tagueando a imagem Docker..."
+      - docker tag $ECR_REPOSITORY:$IMAGE_TAG <aws_account_id>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
   post_build:
     commands:
-      - echo "Pushing the Docker image to ECR..."
-      - docker push <ECR_REPOSITORY_URL>:latest
-      - echo "Creating imagedefinitions.json..."
-      - printf '[{"name":"app-container","imageUri":"%s"}]' <ECR_REPOSITORY_URL>:latest > imagedefinitions.json
+      - echo "Fazendo push da imagem para o Amazon ECR..."
+      - docker push <aws_account_id>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+      - echo "Build e push da imagem concluídos com sucesso!"
+
 artifacts:
   files:
-    - imagedefinitions.json
+    - infra/**/*
+    - app/**/*
+  discard-paths: yes

@@ -138,3 +138,27 @@ resource "aws_iam_role_policy" "codebuild_s3_policy" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "codebuild_ecr_policy" {
+  name = "CodeBuildECRPolicy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:CompleteLayerUpload",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
