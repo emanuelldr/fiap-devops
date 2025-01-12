@@ -89,6 +89,39 @@ resource "aws_iam_role_policy" "codepipeline_codebuild_policy" {
           "codebuild:ListBuildsForProject"
         ],
         Resource = "arn:aws:codebuild:us-east-1:058264065873:project/CLD34-devops-final-Build"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::cld34-terraform-state-bucket",
+          "arn:aws:s3:::cld34-terraform-state-bucket/*"
+        ]
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:UpdateItem"
+        ],
+        Resource = "arn:aws:dynamodb:us-east-1:058264065873:table/terraform-lock-table"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "ec2:DescribeInstances",
+          "ecs:CreateService",
+          "ecs:UpdateService",
+          "ecs:DescribeServices",
+          "ecs:RegisterTaskDefinition"
+        ],
+        Resource = "*"
       }
     ]
   })
