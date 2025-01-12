@@ -44,4 +44,5 @@ artifacts:
   files:
     - infra/**/*
     - app/**/*
+    - imagedefinitions.json
   discard-paths: yes
