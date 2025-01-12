@@ -21,6 +21,9 @@ phases:
     commands:
       - echo "Fazendo login no Amazon ECR..."
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo "Definindo ECR_REPOSITORY_URI..."
+      - export ECR_REPOSITORY_URI=058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY
+      - echo "ECR_REPOSITORY_URI: $ECR_REPOSITORY_URI"
       - echo "Preparando Terraform..."
       - cd infra
       - terraform init -backend-config="bucket=cld34-terraform-state-bucket" -backend-config="key=envs/dev/terraform.tfstate" -backend-config="region=us-east-1" -backend-config="dynamodb_table=terraform-lock-table"
@@ -37,11 +40,11 @@ phases:
   post_build:
     commands:
       - echo "Fazendo push da imagem para o Amazon ECR..."
-      - docker push 058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+      - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
       - echo "Build e push da imagem concluídos com sucesso!"
       - echo "Criando o arquivo imagedefinitions.json..."
-      - echo '[{"name":"app-container","imageUri":"'"$ECR_REPOSITORY_URI:latest"'"}]' > imagedefinitions.json
-      - echo "Arquivo imagedefinitions.json gerado com sucesso."
+      - echo '[{"name":"app-container","imageUri":"'"$ECR_REPOSITORY_URI:$IMAGE_TAG"'"}]' > imagedefinitions.json
+      - echo "Arquivo imagedefinitions.json gerado com sucesso.
 
 artifacts:
   files:
