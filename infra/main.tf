@@ -192,7 +192,7 @@ resource "aws_ecs_service" "service" {
 
 resource "aws_appautoscaling_target" "ecs_scaling_target" {
   service_namespace  = "ecs"
-  resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   min_capacity       = 1 # O serviço nunca terá menos de 1 tarefa
   max_capacity       = 2 # O serviço pode escalar até 2 tarefas
@@ -202,7 +202,7 @@ resource "aws_appautoscaling_policy" "scale_up" {
   name               = "scale-up-policy"
   policy_type        = "TargetTrackingScaling" # Tipo de política deve ser TargetTrackingScaling
   service_namespace  = "ecs"
-  resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
 
   target_tracking_scaling_policy_configuration {
@@ -219,7 +219,7 @@ resource "aws_appautoscaling_policy" "scale_down" {
   name               = "scale-down-policy"
   policy_type        = "TargetTrackingScaling"
   service_namespace  = "ecs"
-  resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
 
   target_tracking_scaling_policy_configuration {
