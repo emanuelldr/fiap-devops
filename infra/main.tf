@@ -152,8 +152,8 @@ resource "aws_ecs_task_definition" "task" {
   family                   = "CLD34-devops-final-task"
   network_mode             = "bridge"
   requires_compatibilities = ["EC2"]
-  cpu                      = "256"
-  memory                   = "512"
+  cpu                      = "128"
+  memory                   = "256"
 
   container_definitions = jsonencode([
     {
