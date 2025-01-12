@@ -201,19 +201,7 @@ resource "aws_iam_role_policy" "codebuild_ec2_policy" {
       {
         Effect   = "Allow",
         Action   = [
-          "ec2:CreateVpc",
-          "ec2:ModifyVpcAttribute",
-          "ec2:DescribeVpcs",
-          "ec2:CreateTags",
-          "ec2:DescribeSubnets",
-          "ec2:CreateSubnet",
-          "ec2:DescribeRouteTables",
-          "ec2:CreateRouteTable",
-          "ec2:CreateRoute",
-          "ec2:AssociateRouteTable",
-          "ec2:DescribeSecurityGroups",
-          "ec2:CreateSecurityGroup",
-          "ec2:AuthorizeSecurityGroupIngress"
+          "ec2:*"
         ],
         Resource = "*"
       }
@@ -245,7 +233,12 @@ resource "aws_iam_role_policy" "codebuild_ecs_policy" {
           "ecs:ListTasks",
           "ecs:DescribeTasks",
           "ecs:UpdateClusterSettings",
-          "ecs:PutClusterCapacityProviders"
+          "ecs:PutClusterCapacityProviders",
+          "ecs:CreateService",
+          "ecs:DeleteService",
+          "ecs:DescribeServices",
+          "ecs:UpdateService",
+          "ecs:ListServices"
         ],
         Resource = "*"
       }

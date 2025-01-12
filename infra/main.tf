@@ -2,6 +2,16 @@ provider "aws" {
   region = "us-east-1"
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "cld34-terraform-state-bucket"
+    key            = "envs/dev/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-lock-table"
+    encrypt        = true
+  }
+}
+
 # VPC
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
@@ -130,6 +140,13 @@ resource "aws_iam_instance_profile" "ecs_profile" {
   role = aws_iam_role.ecs_role.name
 }
 
+resource "aws_ecr_repository" "demo_repo" {
+  name = "cld34-devops-repo"
+  tags = {
+    Environment = "DevOps"
+  }
+}
+
 # ECS Task Definition
 resource "aws_ecs_task_definition" "task" {
   family                   = "CLD34-devops-final-task"
@@ -141,7 +158,7 @@ resource "aws_ecs_task_definition" "task" {
   container_definitions = jsonencode([
     {
       name      = "app-container"
-      image     = "058264065873.dkr.ecr.us-east-1.amazonaws.com/cld34-devops-repo:latest"
+      image     = "${aws_ecr_repository.demo_repo.repository_url}:latest"
       cpu       = 256
       memory    = 512
       essential = true
