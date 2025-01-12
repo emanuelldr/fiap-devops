@@ -290,6 +290,22 @@ resource "aws_iam_role_policy" "codebuild_ecs_policy" {
   })
 }
 
+resource "aws_iam_role" "codedeploy_role" {
+  name = "CLD34-devops-final-CodeDeploy-Role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect    = "Allow",
+        Principal = {
+          Service = "codedeploy.amazonaws.com"
+        },
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+}
 
 resource "aws_iam_role_policy" "codebuild_iam_policy" {
   name = "CodeBuildIAMAccessPolicy"
@@ -332,4 +348,80 @@ resource "aws_iam_role_policy" "codebuild_iam_policy" {
       }
     ]
   })
+}
+
+
+resource "aws_iam_policy" "codedeploy_ecs_policy" {
+  name        = "CodeDeployECSAccessPolicy"
+  description = "Permissões para CodeDeploy acessar ECS e ECR"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "ecs:DescribeServices",
+          "ecs:DescribeTaskDefinition",
+          "ecs:DescribeTasks",
+          "ecs:ListServices",
+          "ecs:ListTasks",
+          "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "codedeploy:CreateDeployment",
+          "codedeploy:GetDeployment",
+          "codedeploy:GetDeploymentConfig"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "attach_codedeploy_ecs_policy" {
+  name       = "codedeploy-ecs-policy-attachment"
+  roles      = [aws_iam_role.codedeploy_role.name]
+  policy_arn = aws_iam_policy.codedeploy_ecs_policy.arn
+}
+
+resource "aws_iam_policy_attachment" "codepipeline_codedeploy_access" {
+  name       = "codepipeline-codedeploy-access"
+  roles      = [aws_iam_role.codepipeline_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployFullAccess"
+}
+
+
+resource "aws_iam_policy_attachment" "codepipeline_ecs_policy" {
+  name       = "codepipeline-ecs-policy"
+  roles      = [aws_iam_role.codepipeline_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployFullAccess"
+}
+
+resource "aws_iam_policy_attachment" "codepipeline_ecs_policy_attach" {
+  name       = "attach-codepipeline-ecs-policy"
+  roles      = [aws_iam_role.codepipeline_role.name]
+  policy_arn = aws_iam_policy.codedeploy_ecs_policy.arn
 }

@@ -159,8 +159,8 @@ resource "aws_ecs_task_definition" "task" {
     {
       name      = "app-container"
       image     = "${aws_ecr_repository.demo_repo.repository_url}:latest"
-      cpu       = 256
-      memory    = 512
+      cpu       = 128
+      memory    = 256
       essential = true
       portMappings = [
         {
