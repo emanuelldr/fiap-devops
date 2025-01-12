@@ -185,7 +185,7 @@ resource "aws_ecs_service" "service" {
   network_configuration {
     subnets         = [aws_subnet.public.id]
     security_groups = [aws_security_group.ecs_sg.id]
-    assign_public_ip = true # Para permitir acesso externo
+    assign_public_ip = false # Para permitir acesso externo
   }
 }
 
