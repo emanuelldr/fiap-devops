@@ -202,6 +202,7 @@ resource "aws_iam_role_policy" "codebuild_ec2_policy" {
         Effect   = "Allow",
         Action   = [
           "ec2:CreateVpc",
+          "ec2:ModifyVpcAttribute",
           "ec2:DescribeVpcs",
           "ec2:CreateTags",
           "ec2:DescribeSubnets",
@@ -234,6 +235,8 @@ resource "aws_iam_role_policy" "codebuild_ecs_policy" {
           "ecs:DeleteCluster",
           "ecs:DescribeClusters",
           "ecs:ListClusters",
+          "ecs:TagResource",
+          "ecs:UntagResource",
           "ecs:RegisterTaskDefinition",
           "ecs:DeregisterTaskDefinition",
           "ecs:DescribeTaskDefinition",
@@ -268,6 +271,7 @@ resource "aws_iam_role_policy" "codebuild_iam_policy" {
           "iam:DeleteRole",
           "iam:ListRolePolicies",
           "iam:DeleteRolePolicy",
+          "iam:ListAttachedRolePolicies",
           "iam:PassRole"
         ],
         Resource = [
