@@ -184,8 +184,8 @@ resource "aws_ecs_service" "service" {
   launch_type     = "EC2"
 
   network_configuration {
-    subnets         = [aws_subnet.public_subnet.id]
-    security_groups = [aws_security_group.default.id]
+    subnets         = [aws_subnet.public.id]
+    security_groups = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
 }
