@@ -23,12 +23,7 @@ phases:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin 058264065873.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo "Preparando Terraform..."
       - cd infra
-      - terraform init \
-          -backend-config="bucket=cld34-terraform-state-bucket" \
-          -backend-config="key=envs/dev/terraform.tfstate" \
-          -backend-config="region=us-east-1" \
-          -backend-config="dynamodb_table=terraform-lock-table"
-
+      - terraform init -backend-config="bucket=cld34-terraform-state-bucket" -backend-config="key=envs/dev/terraform.tfstate" -backend-config="region=us-east-1" -backend-config="dynamodb_table=terraform-lock-table"
       - terraform validate
   build:
     commands:
