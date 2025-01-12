@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   variables:
-    ECR_REPOSITORY: cld34-devops-repo"  # Nome do repositório no ECR
-    IMAGE_TAG: "latest"  # Pode ser atualizado para usar algo dinâmico
+    ECR_REPOSITORY: cld34-devops-repo  # Nome do repositório no ECR
+    IMAGE_TAG: latest  # Pode ser atualizado para usar algo dinâmico
 
 phases:
   install:

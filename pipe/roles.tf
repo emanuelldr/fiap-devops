@@ -89,7 +89,18 @@ resource "aws_iam_role_policy" "codepipeline_codebuild_policy" {
           "codebuild:ListBuildsForProject"
         ],
         Resource = "arn:aws:codebuild:us-east-1:058264065873:project/CLD34-devops-final-Build"
-      },
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "codebuild_policy" {
+  name = "CodeBuildS3AccessPolicy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
       {
         Effect   = "Allow",
         Action   = [
@@ -292,18 +303,32 @@ resource "aws_iam_role_policy" "codebuild_iam_policy" {
         Action   = [
           "iam:CreateRole",
           "iam:AttachRolePolicy",
+          "iam:ListEntitiesForPolicy",
+          "iam:GetPolicy",
           "iam:PutRolePolicy",
           "iam:GetRole",
           "iam:DeleteRole",
           "iam:ListRolePolicies",
           "iam:DeleteRolePolicy",
           "iam:ListAttachedRolePolicies",
-          "iam:PassRole"
+          "iam:PassRole",
+          "iam:GetInstanceProfile",
+          "iam:ListInstanceProfiles",
+          "iam:ListInstanceProfilesForRole"
         ],
         Resource = [
           "arn:aws:iam::058264065873:role/CLD34-devops-final-ECS-Instance-Role",
-          "arn:aws:iam::058264065873:role/*"
+          "arn:aws:iam::058264065873:role/*",
+          "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
+          "arn:aws:iam::058264065873:instance-profile/CLD34-devops-final-ECS-Instance-Profile"
         ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:GetInstanceProfile"
+        ],
+        Resource = "arn:aws:iam::058264065873:instance-profile/CLD34-devops-final-ECS-Instance-Profile"
       }
     ]
   })
