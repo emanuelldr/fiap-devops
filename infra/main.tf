@@ -150,7 +150,7 @@ resource "aws_ecr_repository" "demo_repo" {
 # ECS Task Definition
 resource "aws_ecs_task_definition" "task" {
   family                   = "CLD34-devops-final-task"
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"]
   cpu                      = "128"
   memory                   = "256"
@@ -165,7 +165,7 @@ resource "aws_ecs_task_definition" "task" {
       portMappings = [
         {
           containerPort = 80
-          hostPort      = 80
+          hostPort      = 0
           protocol      = "tcp"
         }
       ]
@@ -182,7 +182,56 @@ resource "aws_ecs_service" "service" {
   deployment_minimum_healthy_percent = 50 
   deployment_maximum_percent         = 200
   launch_type     = "EC2"
+
+  network_configuration {
+    subnets         = [aws_subnet.public_subnet.id]
+    security_groups = [aws_security_group.default.id]
+    assign_public_ip = true
+  }
 }
+
+resource "aws_appautoscaling_target" "ecs_scaling_target" {
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  min_capacity       = 1 # O serviço nunca terá menos de 1 tarefa
+  max_capacity       = 2 # O serviço pode escalar até 2 tarefas
+}
+
+resource "aws_appautoscaling_policy" "scale_up" {
+  name               = "scale-up-policy"
+  policy_type        = "TargetTrackingScaling" # Tipo de política deve ser TargetTrackingScaling
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 50.0
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    scale_in_cooldown  = 60
+    scale_out_cooldown = 60
+  }
+}
+
+resource "aws_appautoscaling_policy" "scale_down" {
+  name               = "scale-down-policy"
+  policy_type        = "TargetTrackingScaling"
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 30.0 # Meta: reduzir se a CPU média estiver abaixo de 30%
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    scale_in_cooldown  = 120 # Aguarda 120 segundos antes de reduzir tarefas
+    scale_out_cooldown = 60  # Tempo de espera ao escalar para cima (pode ser diferente do scale_up)
+  }
+}
+
 
 # Output for ECS Cluster
 output "ecs_cluster_name" {
