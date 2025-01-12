@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Setting up Terraform..."
+      - terraform init -input=false
+  build:
+    commands:
+      - echo "Applying Terraform to provision infrastructure..."
+      - terraform apply -auto-approve -input=false
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_REPOSITORY_URL>
+      - echo "Building the Docker image..."
+      - docker build -t hello-world .
+      - docker tag hello-world:latest <ECR_REPOSITORY_URL>:latest
+  post_build:
+    commands:
+      - echo "Pushing the Docker image to ECR..."
+      - docker push <ECR_REPOSITORY_URL>:latest
+      - echo "Creating imagedefinitions.json..."
+      - printf '[{"name":"app-container","imageUri":"%s"}]' <ECR_REPOSITORY_URL>:latest > imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json

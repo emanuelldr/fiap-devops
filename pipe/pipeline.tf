@@ -1,3 +1,4 @@
+
 resource "aws_codepipeline" "pipeline" {
   name     = "CLD34-devops-final-Pipeline"
   role_arn = aws_iam_role.codepipeline_role.arn
@@ -19,12 +20,13 @@ resource "aws_codepipeline" "pipeline" {
       output_artifacts = ["source_output"]
 
       configuration = {
-        Owner      = "SEU_GITHUB_USUARIO"
-        Repo       = "SEU_REPOSITORIO"
+        Owner      = "emanuelldr"
+        Repo       = "fiap-devops"
         Branch     = "main"
-        OAuthToken = "SEU_GITHUB_TOKEN"
+        OAuthToken = var.github_oauth_token 
       }
     }
+
   }
 
   stage {
@@ -57,8 +59,8 @@ resource "aws_codepipeline" "pipeline" {
       input_artifacts  = ["build_output"]
 
       configuration = {
-        ClusterName = aws_ecs_cluster.main.name
-        ServiceName = aws_ecs_service.service.name
+        ClusterName = "CLD34-devops-final-ECS-Cluster"
+        ServiceName = "CLD34-devops-final-service"
         FileName    = "imagedefinitions.json"
       }
     }

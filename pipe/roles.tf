@@ -19,7 +19,7 @@ resource "aws_iam_role" "codepipeline_role" {
 resource "aws_iam_policy_attachment" "codepipeline_policy" {
   name       = "attach-codepipeline-policy"
   roles      = [aws_iam_role.codepipeline_role.name]
-  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess"
 }
 
 # Role para o CodeBuild
@@ -44,4 +44,97 @@ resource "aws_iam_policy_attachment" "codebuild_policy" {
   name       = "attach-codebuild-policy"
   roles      = [aws_iam_role.codebuild_role.name]
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+}
+
+resource "aws_s3_bucket_policy" "pipeline_bucket_policy" {
+  bucket = aws_s3_bucket.pipeline_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid       = "AllowCodePipelineAccess",
+        Effect    = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::058264065873:role/CLD34-devops-final-CodePipeline-Role"
+        },
+        Action    = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        Resource  = [
+          "${aws_s3_bucket.pipeline_bucket.arn}",
+          "${aws_s3_bucket.pipeline_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "codepipeline_codebuild_policy" {
+  name = "CodePipelineCodeBuildPolicy"
+  role = aws_iam_role.codepipeline_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "codebuild:StartBuild",
+          "codebuild:BatchGetBuilds",
+          "codebuild:BatchGetProjects",
+          "codebuild:ListBuildsForProject"
+        ],
+        Resource = "arn:aws:codebuild:us-east-1:058264065873:project/CLD34-devops-final-Build"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "codebuild_logging_policy" {
+  name = "CodeBuildLoggingPolicy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = [
+          "arn:aws:logs:us-east-1:058264065873:log-group:/aws/codebuild/*",
+          "arn:aws:logs:us-east-1:058264065873:log-group:/aws/codebuild/*:log-stream:*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "codebuild_s3_policy" {
+  name = "CodeBuildS3Policy"
+  role = aws_iam_role.codebuild_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::cld34-devops-final-pipeline-bucket",           # Permissão para listar o bucket
+          "arn:aws:s3:::cld34-devops-final-pipeline-bucket/*"         # Permissão para acessar objetos específicos
+        ]
+      }
+    ]
+  })
 }
